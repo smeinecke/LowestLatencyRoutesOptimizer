@@ -183,28 +183,29 @@ class LowestLatencyRoutesOptimizer:
                         metrics['loss'] = metrics['loss'] / checks
                         host_data.append((source, metrics['rtt'], metrics['loss']))
                         logging.info("%s: %s: %s %s", host, source, metrics['rtt'], metrics['loss'])
-                    host_data = sorted(host_data, key=lambda y: (y[2], y[1]))
+
+                    host_data = sorted(host_data, key=lambda y: (y[2], y[1]))[0]
 
                     logging.debug(self.current_routes)
                     if host not in self.current_routes:
                         # no routing set
-                        self.apply_route_config(host, host_data[0][0])
+                        self.apply_route_config(host, host_data[0])
                         continue
 
-                    if self.current_routes[host] == host_data[0][0]:
+                    if self.current_routes[host] == host_data[0]:
                         logging.debug("Current route is fastest route")
                         continue
 
-                    if results[self.current_routes[host][0]]['loss'] > self.config.get('paketloss_threshold', 5):
+                    if results[self.current_routes[host]]['loss'] > self.config.get('paketloss_threshold', 5):
                         logging.warning("Current route has paketloss, need to switch")
                     else:
-                        rtt_diff = results[self.current_routes[host]]['rtt'] - results[host_data[0][0]]['rtt']
+                        rtt_diff = results[self.current_routes[host]]['rtt'] - host_data[1]
 
                         if rtt_diff < self.config.get('rtt_threshold', 20):
                             logging.info("Route not changed, rtt difference %s < threshold %s", rtt_diff, self.config.get('rtt_threshold', 10))
                             continue
 
-                    self.apply_route_config(host, host_data[0][0])
+                    self.apply_route_config(host, host_data[0])
 
                 checks = 0
                 sums = {}
