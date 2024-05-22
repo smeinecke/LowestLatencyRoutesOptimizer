@@ -1,0 +1,17 @@
+[Unit]
+Description=Lowest Latency Routes Optimizer
+After=network.target
+StartLimitIntervalSec=500
+StartLimitBurst=5
+
+[Service]
+SyslogIdentifier=LLRO
+ExecStart=/usr/local/bin/llro.py --config /etc/llro.yml
+User=root
+Group=root
+KillMode=process
+Restart=always
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target
