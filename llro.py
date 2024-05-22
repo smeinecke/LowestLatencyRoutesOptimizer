@@ -159,7 +159,7 @@ class LowestLatencyRoutesOptimizer:
                 logging.debug("%s: %s", host, host_data[host])
 
             checks += 1
-            if checks >= self.config.get('test_count', 10) or force_reset:
+            if checks >= self.config.get('test_count', 10) or force_reset or not self.current_routes:
                 for host, results in sums.items():
                     host_data = []
                     for source, metrics in results.items():
