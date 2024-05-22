@@ -4,7 +4,8 @@ import logging
 from icmplib import async_multiping
 import asyncio
 import argparse
-import pyroute2
+# import pyroute2
+import os
 
 logging.basicConfig(
     level=logging.INFO,
@@ -52,6 +53,14 @@ class LowestLatencyRoutesOptimizer:
         for _dst_ips in self.config.get('also_route', {}).values():
             dst_ips.update(_dst_ips)
 
+        # as pyroute2 is unstabile as hell i simply replace it with local "ip route" calls.
+        for host in source_ips:
+            try:
+                os.system(f"ip route del {host}/32")
+            except Exception as e:
+                logging.exception(e)
+
+        """
         with pyroute2.NDB() as ndb:
             for host in dst_ips:
                 try:
@@ -64,6 +73,7 @@ class LowestLatencyRoutesOptimizer:
                         route.remove()
                 except KeyError:
                     continue
+        """
 
     def apply_route_config(self, host, gateway):
         """
@@ -82,6 +92,10 @@ class LowestLatencyRoutesOptimizer:
 
         try:
             for host in hosts_to_add:
+                # as pyroute2 is unstabile as hell i simply replace it with local "ip route" calls.
+                os.system(f"ip route add {host}/32 via {gateway}")
+                os.system(f"ip route replace {host}/32 via {gateway}")
+                """
                 with pyroute2.NDB() as ndb:
                     try:
                         with ndb.routes[{'dst': f"{host}/32"}] as route:
@@ -92,7 +106,7 @@ class LowestLatencyRoutesOptimizer:
                     except KeyError:
                         logging.info("Add %s => %s", host, gateway)
                         ndb.routes.create(dst=f"{host}/32", gateway=gateway).commit()
-
+                """
             self.current_routes[host] = gateway
         except Exception as e:
             logging.exception(e)
