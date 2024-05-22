@@ -4,8 +4,7 @@ import logging
 from icmplib import async_multiping
 import asyncio
 import argparse
-from pyroute2 import NDB
-import pyroute2.netlink.exceptions
+import pyroute2
 
 logging.basicConfig(
     level=logging.INFO,
@@ -53,7 +52,7 @@ class LowestLatencyRoutesOptimizer:
         for _dst_ips in self.config.get('also_route', {}).values():
             dst_ips.update(_dst_ips)
 
-        with NDB() as ndb:
+        with pyroute2.NDB() as ndb:
             for host in dst_ips:
                 try:
                     with ndb.routes[f"{host}/32"] as route:
@@ -82,7 +81,7 @@ class LowestLatencyRoutesOptimizer:
         hosts_to_add = [host] + self.config.get('also_route', {}).get(host, [])
 
         try:
-            with NDB() as ndb:
+            with pyroute2.NDB() as ndb:
                 if host in self.current_routes:
                     for host in hosts_to_add:
                         try:
