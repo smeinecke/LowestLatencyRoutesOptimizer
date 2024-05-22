@@ -81,15 +81,16 @@ class LowestLatencyRoutesOptimizer:
         hosts_to_add = [host] + self.config.get('also_route', {}).get(host, [])
 
         try:
-            with pyroute2.NDB() as ndb:
-                for host in hosts_to_add:
+            for host in hosts_to_add:
+                with pyroute2.NDB() as ndb:
                     try:
                         with ndb.routes[f"{host}/32"] as route:
-                            logging.info("Update %s => %s", host, gateway)
+                            logging.info("Update %s => %s (%s)", host, gateway, route['gateway'])
                             route.set('gateway', gateway)
                     except pyroute2.netlink.exceptions.NetlinkError:
                         pass
                     except KeyError:
+                        logging.info("Add %s => %s", host, gateway)
                         ndb.routes.create(dst=f"{host}/32", gateway=gateway).commit()
 
             self.current_routes[host] = gateway
