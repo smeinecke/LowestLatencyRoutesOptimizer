@@ -110,7 +110,7 @@ class LowestLatencyRoutesOptimizer:
                         logging.info("Add %s => %s", host, gateway)
                         ndb.routes.create(dst=f"{host}/32", gateway=gateway).commit()
                 """
-            self.current_routes[_host] = gateway
+            self.current_routes[host] = gateway
         except Exception as e:
             logging.exception(e)
 
@@ -186,6 +186,7 @@ class LowestLatencyRoutesOptimizer:
                         logging.info("%s: %s: %s %s", host, source, metrics['rtt'], metrics['loss'])
                     host_data = sorted(host_data, key=lambda y: (y[2], y[1]))
 
+                    logging.info(self.current_routes)
                     if host not in self.current_routes:
                         # no routing set
                         self.apply_route_config(host, host_data[0][0])
