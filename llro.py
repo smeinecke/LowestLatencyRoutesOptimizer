@@ -177,8 +177,8 @@ class LowestLatencyRoutesOptimizer:
                 for host, results in sums.items():
                     host_data = []
                     for source, metrics in results.items():
-                        metrics['rtt'] = metrics['rtt'] / self.config.get('test_count', 10)
-                        metrics['loss'] = metrics['loss'] / self.config.get('test_count', 10)
+                        metrics['rtt'] = metrics['rtt'] / checks
+                        metrics['loss'] = metrics['loss'] / checks
                         host_data.append((source, metrics['rtt'], metrics['loss']))
                         logging.info("%s: %s: %s %s", host, source, metrics['rtt'], metrics['loss'])
                     host_data = sorted(host_data, key=lambda y: (y[2], y[1]))
