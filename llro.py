@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import yaml
 import logging
 from icmplib import async_multiping
