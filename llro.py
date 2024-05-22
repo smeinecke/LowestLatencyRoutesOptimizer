@@ -222,6 +222,9 @@ def main():
         logging.error('Config does not contain monitor list')
         exit(1)
 
+    if config.get('debug'):
+        logging.getLogger('root').setLevel(logging.DEBUG)
+
     llro = LowestLatencyRoutesOptimizer(config)
     llro.run()
 
