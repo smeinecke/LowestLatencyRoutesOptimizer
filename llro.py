@@ -85,21 +85,21 @@ class LowestLatencyRoutesOptimizer:
                 for host in hosts_to_add:
                     try:
                         with ndb.routes[f"{host}/32"] as route:
+                            logging.info("Update %s => %s", host, gateway)
                             route.set('gateway', gateway)
-                            logging.info("Updated %s => %s", host, gateway)
                     except KeyError:
                         ndb.routes.create(dst=f"{host}/32", gateway=gateway).commit()
             else:
                 # add new routes
                 for host in hosts_to_add:
                     try:
+                        logging.info("Adde %s => %s", host, gateway)
                         ndb.routes.create(dst=f"{host}/32", gateway=gateway).commit()
-                        logging.info("Added %s => %s", host, gateway)
                     except KeyError:
                         with ndb.routes[f"{host}/32"] as route:
                             if route['gateway'] != gateway:
+                                logging.info("Update %s => %s", host, gateway)
                                 route.set('gateway', gateway)
-                                logging.info("Updated %s => %s", host, gateway)
 
         self.current_routes[host] = gateway
 
