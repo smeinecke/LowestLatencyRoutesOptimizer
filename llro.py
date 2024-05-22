@@ -96,8 +96,7 @@ class LowestLatencyRoutesOptimizer:
                 # as pyroute2 is unstabile as hell i simply replace it with local "ip route" calls.
                 if host not in self.current_routes:
                     os.system(f"ip route add {_host}/32 via {gateway}")
-                else:
-                    os.system(f"ip route replace {_host}/32 via {gateway}")
+                os.system(f"ip route replace {_host}/32 via {gateway}")
                 """
                 with pyroute2.NDB() as ndb:
                     try:
