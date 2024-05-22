@@ -1,0 +1,21 @@
+---
+monitor:
+  - 1.1.1.1
+
+also_route:
+  1.1.1.1:
+    - 1.0.0.1
+
+interfaces:
+  eth0:
+    - 192.168.0.8
+
+  lo:
+    - 127.0.0.1
+
+rtt_threshold: 20
+paketloss_threshold: 2
+test_count: 5
+test_interval: 2
+scan_interval: 30
+delete_preadded_routes: true
