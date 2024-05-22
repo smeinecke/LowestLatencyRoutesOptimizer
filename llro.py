@@ -90,11 +90,14 @@ class LowestLatencyRoutesOptimizer:
         """
         hosts_to_add = [host] + self.config.get('also_route', {}).get(host, [])
 
+        logging.info("Apply %s => %s", host, gateway)
         try:
-            for host in hosts_to_add:
+            for _host in hosts_to_add:
                 # as pyroute2 is unstabile as hell i simply replace it with local "ip route" calls.
-                os.system(f"ip route add {host}/32 via {gateway}")
-                os.system(f"ip route replace {host}/32 via {gateway}")
+                if host not in self.current_routes:
+                    os.system(f"ip route add {_host}/32 via {gateway}")
+                else:
+                    os.system(f"ip route replace {_host}/32 via {gateway}")
                 """
                 with pyroute2.NDB() as ndb:
                     try:
@@ -107,7 +110,7 @@ class LowestLatencyRoutesOptimizer:
                         logging.info("Add %s => %s", host, gateway)
                         ndb.routes.create(dst=f"{host}/32", gateway=gateway).commit()
                 """
-            self.current_routes[host] = gateway
+            self.current_routes[_host] = gateway
         except Exception as e:
             logging.exception(e)
 
