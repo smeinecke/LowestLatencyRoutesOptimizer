@@ -182,7 +182,7 @@ class LowestLatencyRoutesOptimizer:
                         metrics['rtt'] = metrics['rtt'] / checks
                         metrics['loss'] = metrics['loss'] / checks
                         host_data.append((source, metrics['rtt'], metrics['loss']))
-                        logging.info("%s: %s: %s %s", host, source, metrics['rtt'], metrics['loss'])
+                        logging.debug("%s: %s: %s %s", host, source, metrics['rtt'], metrics['loss'])
 
                     host_data = sorted(host_data, key=lambda y: (y[2], y[1]))[0]
 
@@ -202,7 +202,7 @@ class LowestLatencyRoutesOptimizer:
                         rtt_diff = results[self.current_routes[host]]['rtt'] - host_data[1]
 
                         if rtt_diff < self.config.get('rtt_threshold', 20):
-                            logging.info("Route not changed, rtt difference %s < threshold %s", rtt_diff, self.config.get('rtt_threshold', 10))
+                            logging.info("Route not changed to %s, rtt difference %s < threshold %s", host_data[0], rtt_diff, self.config.get('rtt_threshold', 10))
                             continue
 
                     self.apply_route_config(host, host_data[0])
