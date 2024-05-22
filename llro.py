@@ -124,11 +124,14 @@ class LowestLatencyRoutesOptimizer:
             result = await asyncio.gather(*tasks)
 
             host_data = {}
+            sources_up = set()
             for x, hosts in enumerate(result):
                 source = sources[x]
                 for host in hosts:
                     if not host.is_alive:
                         continue
+
+                    sources_up.add(source)
 
                     if not host.address in sums:
                         sums[host.address] = {}
@@ -147,12 +150,15 @@ class LowestLatencyRoutesOptimizer:
 
                     host_data[host.address].append((source, host.avg_rtt, host.packet_loss))
 
+            force_reset = False
             for host, results in host_data.items():
+                if host in self.current_routes and self.current_routes[host] not in sources_up:
+                    force_reset = True
                 host_data[host] = sorted(results, key=lambda y: (y[2], y[1]))
                 logging.debug("%s: %s", host, host_data[host])
 
             checks += 1
-            if checks >= self.config.get('test_count', 10):
+            if checks >= self.config.get('test_count', 10) or force_reset:
                 for host, results in sums.items():
                     host_data = []
                     for source, metrics in results.items():
@@ -167,14 +173,14 @@ class LowestLatencyRoutesOptimizer:
                         self.apply_route_config(host, host_data[0][0])
                         continue
 
-                    if self.current_routes[host][0] == host_data[0][0]:
+                    if self.current_routes[host] == host_data[0][0]:
                         logging.debug("Current route is fastest route")
                         continue
 
                     if results[self.current_routes[host][0]]['loss'] > self.config.get('paketloss_threshold', 5):
                         logging.warning("Current route has paketloss, need to switch")
                     else:
-                        rtt_diff = results[self.current_routes[host][0]]['rtt'] - results[host_data[0][0]]['rtt']
+                        rtt_diff = results[self.current_routes[host]]['rtt'] - results[host_data[0][0]]['rtt']
 
                         if rtt_diff < self.config.get('rtt_threshold', 20):
                             logging.info("Route not changed, rtt difference %s < threshold %s", rtt_diff, self.config.get('rtt_threshold', 10))
