@@ -5,6 +5,7 @@ from icmplib import async_multiping
 import asyncio
 import argparse
 from pyroute2 import NDB
+import pyroute2.netlink.exceptions
 
 logging.basicConfig(
     level=logging.INFO,
